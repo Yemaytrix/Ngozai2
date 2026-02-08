@@ -7,18 +7,25 @@
 
     /* =============================================
        PAGE LOADER
+       Remove the loader immediately, or after a brief delay.
+       Handles the case where 'load' already fired before
+       this script runs by checking document.readyState.
        ============================================= */
-    window.addEventListener('load', function () {
+    function hideLoader() {
         var loader = document.getElementById('page-loader');
         if (loader) {
-            setTimeout(function () {
-                loader.classList.add('hidden');
-            }, 300);
+            loader.classList.add('hidden');
             setTimeout(function () {
                 loader.remove();
-            }, 800);
+            }, 600);
         }
-    });
+    }
+
+    if (document.readyState === 'complete') {
+        hideLoader();
+    } else {
+        window.addEventListener('load', hideLoader);
+    }
 
     /* =============================================
        SMOOTH SCROLLING
@@ -30,12 +37,21 @@
             var target = document.querySelector(href);
             if (target) {
                 e.preventDefault();
-                var offset = 80; // Account for fixed navbar
+                var offset = 80;
                 var targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
                 window.scrollTo({
                     top: targetPosition,
                     behavior: 'smooth'
                 });
+
+                // Close mobile menu if open
+                var navMenu = document.getElementById('nav-menu');
+                var hamburger = document.getElementById('hamburger');
+                if (navMenu && hamburger) {
+                    navMenu.classList.remove('active');
+                    hamburger.classList.remove('active');
+                    hamburger.setAttribute('aria-expanded', 'false');
+                }
             }
         });
     });
@@ -45,18 +61,16 @@
        ============================================= */
     var navbar = document.querySelector('.navbar');
 
-    function handleNavbarScroll() {
-        if (window.pageYOffset > 100) {
+    window.addEventListener('scroll', function () {
+        if (window.pageYOffset > 50) {
             navbar.classList.add('scrolled');
         } else {
             navbar.classList.remove('scrolled');
         }
-    }
-
-    window.addEventListener('scroll', handleNavbarScroll, { passive: true });
+    }, { passive: true });
 
     /* =============================================
-       HAMBURGER MENU TOGGLE
+       HAMBURGER MENU
        ============================================= */
     var hamburger = document.getElementById('hamburger');
     var navMenu = document.getElementById('nav-menu');
@@ -68,16 +82,7 @@
             hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         });
 
-        // Close menu when clicking on a link
-        navMenu.querySelectorAll('.nav-link').forEach(function (link) {
-            link.addEventListener('click', function () {
-                navMenu.classList.remove('active');
-                hamburger.classList.remove('active');
-                hamburger.setAttribute('aria-expanded', 'false');
-            });
-        });
-
-        // Close menu on Escape key
+        // Close on Escape key
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && navMenu.classList.contains('active')) {
                 navMenu.classList.remove('active');
@@ -87,7 +92,7 @@
             }
         });
 
-        // Close menu when clicking outside
+        // Close when clicking outside
         document.addEventListener('click', function (e) {
             if (navMenu.classList.contains('active') &&
                 !navMenu.contains(e.target) &&
@@ -102,7 +107,7 @@
     /* =============================================
        INTERSECTION OBSERVER - FADE-IN ANIMATIONS
        ============================================= */
-    var fadeInObserverOptions = {
+    var observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
     };
@@ -114,9 +119,8 @@
                 fadeInObserver.unobserve(entry.target);
             }
         });
-    }, fadeInObserverOptions);
+    }, observerOptions);
 
-    // Observe all elements with .fade-in class
     document.querySelectorAll('.fade-in').forEach(function (el) {
         fadeInObserver.observe(el);
     });
@@ -127,7 +131,6 @@
     var timelineObserver = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
             if (entry.isIntersecting) {
-                // Stagger the animation based on item index
                 var items = document.querySelectorAll('.timeline-item');
                 var index = Array.prototype.indexOf.call(items, entry.target);
                 setTimeout(function () {
@@ -136,7 +139,7 @@
                 timelineObserver.unobserve(entry.target);
             }
         });
-    }, fadeInObserverOptions);
+    }, observerOptions);
 
     document.querySelectorAll('.timeline-item').forEach(function (item) {
         timelineObserver.observe(item);
@@ -147,9 +150,8 @@
        ============================================= */
     function animateCounter(element, target, suffix, duration) {
         duration = duration || 2000;
-        var start = 0;
         var increment = target / (duration / 16);
-        var current = start;
+        var current = 0;
 
         var timer = setInterval(function () {
             current += increment;
@@ -165,20 +167,17 @@
     var statsObserver = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
             if (entry.isIntersecting) {
-                var statNumbers = entry.target.querySelectorAll('.stat-number');
-                statNumbers.forEach(function (stat) {
-                    // Only animate stats with data-count-target attribute
+                entry.target.querySelectorAll('.stat-number').forEach(function (stat) {
                     if (stat.dataset.countTarget) {
                         var target = parseInt(stat.dataset.countTarget, 10);
                         var suffix = stat.dataset.countSuffix || '';
                         animateCounter(stat, target, suffix);
                     }
-                    // Non-animated stats (like "2-4") remain unchanged
                 });
                 statsObserver.unobserve(entry.target);
             }
         });
-    }, fadeInObserverOptions);
+    }, observerOptions);
 
     var statsCard = document.querySelector('.stats-card');
     if (statsCard) {
@@ -186,14 +185,13 @@
     }
 
     /* =============================================
-       PARALLAX EFFECT - HERO BACKGROUND
+       PARALLAX - HERO BACKGROUND
        ============================================= */
     var parallaxElements = document.querySelectorAll('.gradient-orb');
     var ticking = false;
 
     function updateParallax() {
         var scrolled = window.pageYOffset;
-        // Only apply parallax when hero section is in view
         if (scrolled < window.innerHeight * 1.5) {
             parallaxElements.forEach(function (element, index) {
                 var speed = 0.3 + (index * 0.1);
@@ -213,29 +211,25 @@
     }, { passive: true });
 
     /* =============================================
-       ACTIVE NAVIGATION LINK HIGHLIGHTING
+       ACTIVE NAVIGATION LINK
        ============================================= */
     var sections = document.querySelectorAll('section[id]');
     var navLinks = document.querySelectorAll('.nav-link');
 
-    function updateActiveLink() {
+    window.addEventListener('scroll', function () {
         var current = '';
         sections.forEach(function (section) {
-            var sectionTop = section.offsetTop;
-            if (window.pageYOffset >= sectionTop - 120) {
+            if (window.pageYOffset >= section.offsetTop - 120) {
                 current = section.getAttribute('id');
             }
         });
-
         navLinks.forEach(function (link) {
             link.classList.remove('active');
             if (link.getAttribute('href') === '#' + current) {
                 link.classList.add('active');
             }
         });
-    }
-
-    window.addEventListener('scroll', updateActiveLink, { passive: true });
+    }, { passive: true });
 
     /* =============================================
        BACK TO TOP BUTTON
@@ -243,21 +237,16 @@
     var backToTopBtn = document.getElementById('back-to-top');
 
     if (backToTopBtn) {
-        function toggleBackToTop() {
+        window.addEventListener('scroll', function () {
             if (window.pageYOffset > 500) {
                 backToTopBtn.classList.add('visible');
             } else {
                 backToTopBtn.classList.remove('visible');
             }
-        }
-
-        window.addEventListener('scroll', toggleBackToTop, { passive: true });
+        }, { passive: true });
 
         backToTopBtn.addEventListener('click', function () {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
@@ -269,11 +258,9 @@
     var cookieDecline = document.getElementById('cookie-decline');
 
     if (cookieBanner) {
-        // Check if user has already made a choice
         var cookieChoice = localStorage.getItem('ngozai-cookie-consent');
 
         if (!cookieChoice) {
-            // Show banner after a short delay
             setTimeout(function () {
                 cookieBanner.classList.add('visible');
                 cookieBanner.setAttribute('aria-hidden', 'false');
@@ -291,7 +278,6 @@
                 hideCookieBanner('accepted');
             });
         }
-
         if (cookieDecline) {
             cookieDecline.addEventListener('click', function () {
                 hideCookieBanner('declined');
@@ -309,36 +295,35 @@
             name: {
                 input: document.getElementById('contact-name'),
                 error: document.getElementById('name-error'),
-                validate: function (value) {
-                    if (!value.trim()) return 'Please enter your full name.';
-                    if (value.trim().length < 2) return 'Name must be at least 2 characters.';
+                validate: function (v) {
+                    if (!v.trim()) return 'Please enter your full name.';
+                    if (v.trim().length < 2) return 'Name must be at least 2 characters.';
                     return '';
                 }
             },
             email: {
                 input: document.getElementById('contact-email'),
                 error: document.getElementById('email-error'),
-                validate: function (value) {
-                    if (!value.trim()) return 'Please enter your email address.';
-                    var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRe.test(value.trim())) return 'Please enter a valid email address.';
+                validate: function (v) {
+                    if (!v.trim()) return 'Please enter your email address.';
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())) return 'Please enter a valid email address.';
                     return '';
                 }
             },
             company: {
                 input: document.getElementById('contact-company'),
                 error: document.getElementById('company-error'),
-                validate: function (value) {
-                    if (!value.trim()) return 'Please enter your company name.';
+                validate: function (v) {
+                    if (!v.trim()) return 'Please enter your company name.';
                     return '';
                 }
             },
             message: {
                 input: document.getElementById('contact-message'),
                 error: document.getElementById('message-error'),
-                validate: function (value) {
-                    if (!value.trim()) return 'Please tell us how we can help.';
-                    if (value.trim().length < 10) return 'Please provide a bit more detail (at least 10 characters).';
+                validate: function (v) {
+                    if (!v.trim()) return 'Please tell us how we can help.';
+                    if (v.trim().length < 10) return 'Please provide a bit more detail (at least 10 characters).';
                     return '';
                 }
             }
@@ -350,37 +335,18 @@
         var formSuccess = document.getElementById('form-success');
         var formErrorMsg = document.getElementById('form-error-msg');
 
-        // Real-time validation on blur
-        Object.keys(formFields).forEach(function (key) {
-            var field = formFields[key];
-            if (field.input) {
-                field.input.addEventListener('blur', function () {
-                    validateField(field);
-                });
-                // Clear error on input
-                field.input.addEventListener('input', function () {
-                    clearFieldError(field);
-                });
-            }
-        });
-
         function validateField(field) {
-            var errorMsg = field.validate(field.input.value);
-            if (errorMsg) {
+            var msg = field.validate(field.input.value);
+            if (msg) {
                 field.input.classList.add('input-error');
-                field.error.textContent = errorMsg;
+                field.error.textContent = msg;
                 field.error.classList.add('visible');
                 return false;
-            } else {
-                clearFieldError(field);
-                return true;
             }
-        }
-
-        function clearFieldError(field) {
             field.input.classList.remove('input-error');
             field.error.textContent = '';
             field.error.classList.remove('visible');
+            return true;
         }
 
         function validatePrivacy() {
@@ -388,12 +354,26 @@
                 privacyError.textContent = 'Please accept the privacy policy to continue.';
                 privacyError.classList.add('visible');
                 return false;
-            } else {
-                privacyError.textContent = '';
-                privacyError.classList.remove('visible');
-                return true;
             }
+            privacyError.textContent = '';
+            privacyError.classList.remove('visible');
+            return true;
         }
+
+        // Real-time validation
+        Object.keys(formFields).forEach(function (key) {
+            var field = formFields[key];
+            if (field.input) {
+                field.input.addEventListener('blur', function () { validateField(field); });
+                field.input.addEventListener('input', function () {
+                    if (field.input.classList.contains('input-error')) {
+                        field.input.classList.remove('input-error');
+                        field.error.textContent = '';
+                        field.error.classList.remove('visible');
+                    }
+                });
+            }
+        });
 
         if (privacyCheckbox) {
             privacyCheckbox.addEventListener('change', function () {
@@ -406,50 +386,35 @@
 
         contactForm.addEventListener('submit', function (e) {
             e.preventDefault();
-
-            // Hide previous status messages
             formSuccess.classList.remove('visible');
             formErrorMsg.classList.remove('visible');
 
-            // Validate all fields
             var isValid = true;
             Object.keys(formFields).forEach(function (key) {
-                if (!validateField(formFields[key])) {
-                    isValid = false;
-                }
+                if (!validateField(formFields[key])) isValid = false;
             });
-
-            if (!validatePrivacy()) {
-                isValid = false;
-            }
+            if (!validatePrivacy()) isValid = false;
 
             if (!isValid) {
-                // Focus the first invalid field
                 var firstInvalid = contactForm.querySelector('.input-error');
                 if (firstInvalid) firstInvalid.focus();
                 return;
             }
 
-            // Show loading state
             submitBtn.classList.add('loading');
             submitBtn.disabled = true;
 
-            // Attempt to submit to Formspree (or show success for demo)
             var formAction = contactForm.getAttribute('action');
 
             if (formAction && formAction.indexOf('YOUR_FORM_ID') === -1) {
-                // Real Formspree submission
-                var formData = new FormData(contactForm);
-
                 fetch(formAction, {
                     method: 'POST',
-                    body: formData,
+                    body: new FormData(contactForm),
                     headers: { 'Accept': 'application/json' }
                 })
                 .then(function (response) {
                     submitBtn.classList.remove('loading');
                     submitBtn.disabled = false;
-
                     if (response.ok) {
                         formSuccess.classList.add('visible');
                         contactForm.reset();
@@ -463,7 +428,7 @@
                     formErrorMsg.classList.add('visible');
                 });
             } else {
-                // Demo mode: simulate successful submission
+                // Demo mode
                 setTimeout(function () {
                     submitBtn.classList.remove('loading');
                     submitBtn.disabled = false;
@@ -475,19 +440,27 @@
     }
 
     /* =============================================
-       CARD HOVER ENHANCEMENT
+       SHOWCASE TOGGLE BUTTON
        ============================================= */
-    document.querySelectorAll('.problem-card, .solution-card, .why-point, .testimonial-card').forEach(function (card) {
-        card.addEventListener('mouseenter', function () {
-            this.style.transition = 'all 0.3s ease';
+    var toggleButton = document.querySelector('.toggle-button');
+    if (toggleButton) {
+        function activateToggle() {
+            toggleButton.classList.toggle('active');
+        }
+        toggleButton.addEventListener('click', activateToggle);
+        toggleButton.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                activateToggle();
+            }
         });
-    });
+    }
 
     /* =============================================
-       CONSOLE EASTER EGG
+       CONSOLE
        ============================================= */
-    console.log('%c👋 Hello from Ngozai!', 'color: #0078D4; font-size: 20px; font-weight: bold;');
-    console.log('%cInterested in making Microsoft Copilot actually work? Let\'s talk!', 'color: #8661C5; font-size: 14px;');
-    console.log('%cEmail: hello@ngozai.com', 'color: #00BCF2; font-size: 12px;');
+    console.log('%cHello from Ngozai!', 'color: #0cc0df; font-size: 20px; font-weight: bold;');
+    console.log('%cInterested in making Microsoft Copilot actually work? Let\'s talk!', 'color: #ffde59; font-size: 14px;');
+    console.log('%cEmail: hello@ngozai.com', 'color: #0cc0df; font-size: 12px;');
 
 })();

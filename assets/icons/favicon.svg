@@ -1,14 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-    <defs>
-        <linearGradient id="fg1" x1="4" y1="2" x2="28" y2="15">
-            <stop offset="0%" stop-color="#0078D4"/>
-            <stop offset="100%" stop-color="#00BCF2"/>
-        </linearGradient>
-        <linearGradient id="fg2" x1="4" y1="8" x2="28" y2="28">
-            <stop offset="0%" stop-color="#0078D4"/>
-            <stop offset="100%" stop-color="#8661C5"/>
-        </linearGradient>
-    </defs>
-    <path d="M16 2L4 8.5L16 15L28 8.5Z" fill="url(#fg1)"/>
-    <path d="M4 23.5L16 30L28 23.5V8.5L16 15L4 8.5Z" fill="url(#fg2)"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 24 24">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #0cc0df;
+        stroke-miterlimit: 10;
+        stroke-width: 2px;
+      }
+    </style>
+  </defs>
+  <ellipse class="st0" cx="11.88" cy="12.65" rx="4.36" ry="3.83"/>
+  <circle class="st0" cx="11.71" cy="12.65" r=".7"/>
+  <path class="st0" d="M3.68,4.98S8.02-.73,15.3,10.32"/>
+  <path class="st0" d="M7.64,13.62s4.25,11.38,13.1,6.07"/>
+  <polyline class="st0" points="4.73 15.6 4.73 9.05 7.95 10.84"/>
+  <polyline class="st0" points="16.08 14.2 18.68 15.99 18.68 8.99"/>
 </svg>
