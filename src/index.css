@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+/* TAN Angleton — brand font for "Ngozai" wordmark */
+@font-face {
+  font-family: "TAN Angleton";
+  src: url("https://db.onlinewebfonts.com/t/32aac839ec8704951d812018c43e298d.woff2")
+      format("woff2"),
+    url("https://db.onlinewebfonts.com/t/32aac839ec8704951d812018c43e298d.woff")
+      format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --color-brand: #0cc0df;
+  --color-brand-dark: #0a9ab3;
+  --color-accent: #ffde59;
+  --color-accent-dark: #e6c84f;
+  --color-dark: #000000;
+  --color-success: #107c10;
+  --color-danger: #d13438;
+  --color-muted: #555;
+  --color-surface: #fafafa;
+
+  --font-brand: "TAN Angleton", Georgia, "Times New Roman", serif;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Skip to content (accessibility) */
+.skip-to-content {
+  @apply absolute -top-full left-4 z-[10000] bg-brand text-black px-6 py-3 rounded-b font-semibold no-underline transition-all;
+}
+.skip-to-content:focus {
+  @apply top-0;
+}
