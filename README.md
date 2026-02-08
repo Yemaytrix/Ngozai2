@@ -1,253 +1,319 @@
 # Ngozai Website
 
-A modern, Microsoft Edge-inspired website for Ngozai - AI consulting company specializing in SharePoint preparation for Microsoft Copilot deployment.
+A modern, Microsoft-inspired website for **Ngozai** — an AI consulting company specializing in SharePoint preparation for Microsoft Copilot deployment.
+
+**Live at:** [https://ngozai.com](https://ngozai.com) *(update after deployment)*
+
+---
 
 ## Quick Start
 
-### Opening in Cursor IDE
+### Option 1: Live Server (Recommended for Development)
 
-1. Open Cursor IDE
-2. Click **File** → **Open Folder**
-3. Navigate to and select the `ngozai-website` folder
-4. The project structure will appear in the sidebar
+1. Open this folder in **Cursor IDE** or **VS Code**
+2. Install the **Live Server** extension if not already installed
+3. Right-click `index.html` → **Open with Live Server**
+4. The website will open in your browser with live reload
 
-### Running the Website
+### Option 2: Direct File Opening
 
-**Option 1: Live Server (Recommended)**
-1. Install the "Live Server" extension in Cursor if not already installed
-2. Right-click on `index.html`
-3. Select "Open with Live Server"
-4. The website will open in your default browser with live reload
+1. Double-click `index.html` to open in any browser
+2. All assets use relative paths — no server required
 
-**Option 2: Direct File Opening**
-1. Right-click on `index.html`
-2. Select "Reveal in File Explorer" (Windows) or "Reveal in Finder" (Mac)
-3. Double-click `index.html` to open in your browser
+### Option 3: Local HTTP Server
 
-## 📁 Project Structure
+```bash
+# Using Python 3
+python -m http.server 8000
+
+# Using Node.js (npx)
+npx serve .
+```
+
+Then open [http://localhost:8000](http://localhost:8000)
+
+---
+
+## Project Structure
 
 ```
 ngozai-website/
-├── index.html          # Main HTML structure
-├── styles.css          # All styling and animations
-├── script.js           # Interactive functionality
-└── README.md          # This file
+├── index.html              # Main HTML structure (semantic, accessible)
+├── styles.css              # Complete styling with responsive design
+├── script.js               # Interactive functionality
+├── README.md               # This file
+├── _redirects              # Netlify SPA redirect rules
+├── netlify.toml            # Netlify deployment configuration
+├── vercel.json             # Vercel deployment configuration
+└── assets/
+    ├── images/             # Add your images here (og-image.jpg, etc.)
+    └── icons/
+        └── favicon.svg     # SVG favicon (add PNG versions too)
 ```
 
-## 🎨 Customization Guide
+---
+
+## Customization Guide
 
 ### Colors
-Edit the CSS variables in `styles.css` (lines 9-17):
+
+Edit the CSS custom properties in `styles.css` (lines 17-33):
 
 ```css
 :root {
-    --primary-blue: #0078D4;      /* Primary brand color */
-    --secondary-blue: #00BCF2;    /* Accent color */
-    --purple: #8661C5;            /* Secondary gradient */
-    /* ... more colors */
+    --primary-blue: #0078D4;      /* Microsoft Blue - primary brand */
+    --secondary-blue: #00BCF2;    /* Light Blue - accent color */
+    --purple: #8661C5;            /* Purple - secondary gradient */
+    --dark-blue: #005A9E;         /* Dark Blue - hover states */
+    --light-gray: #F3F2F1;       /* Background sections */
+    --text-primary: #201F1E;      /* Main text */
+    --text-secondary: #605E5C;    /* Secondary text */
 }
 ```
 
-### Content
+### Content Sections
 
-**Hero Section** (index.html, line 36):
-- Change the main headline
-- Update the subtitle
-- Modify call-to-action buttons
+**Hero Section** — Update the headline, subtitle, and CTA buttons in `index.html`:
+- Headline: Line ~93 (`<h1 class="hero-title">`)
+- Subtitle: Line ~97 (`<p class="hero-subtitle">`)
+- Buttons: Line ~101 (`<div class="hero-buttons">`)
 
-**Solutions/Pricing** (index.html, line 161):
-- Update pricing tiers
-- Modify feature lists
-- Change pricing amounts
+**Solutions / Pricing** — Update pricing tiers:
+- Tier 1 price: Search for `$5,000`
+- Tier 2 price: Search for `$25,000`
+- Tier 3: Search for `Custom pricing`
 
-**About Section** (index.html, line 304):
-- Replace placeholder content with your story
-- Add Michelle's photo (replace the SVG placeholder)
+**Testimonials** — Replace placeholder testimonials:
+- Find the `<section class="testimonials-section">` block
+- Update names, titles, companies, and quotes
+- Change avatar initials in `.author-avatar` elements
 
-**Contact Information** (index.html, line 403):
-- Update email address
-- Add phone number if desired
-- Link to social media
+**About Section** — Update Michelle's bio and add a real photo
 
-### Images
+**Contact Info** — Update the email address (search for `hello@ngozai.com`)
 
-To add real images:
+### Adding Real Images
 
-1. Create an `images` folder in the project root
-2. Add your images to this folder
-3. Replace SVG placeholders in `index.html`:
+1. Place images in `assets/images/`
+2. Replace SVG placeholders:
 
 ```html
-<!-- Replace this -->
+<!-- Replace the about section placeholder -->
 <div class="image-placeholder">
-    <svg>...</svg>
+    <!-- Remove the SVG and add: -->
+    <img src="assets/images/michelle.jpg"
+         alt="Michelle, Founder of Ngozai"
+         loading="lazy"
+         width="400" height="400">
 </div>
-
-<!-- With this -->
-<img src="images/your-photo.jpg" alt="Description">
 ```
 
-### Buttons & CTAs
+3. Add an Open Graph image (`assets/images/og-image.jpg`) — recommended size: 1200x630px
+4. Add favicon PNGs:
+   - `assets/icons/favicon-32x32.png`
+   - `assets/icons/favicon-16x16.png`
+   - `assets/icons/apple-touch-icon.png` (180x180px)
 
-The buttons currently show alerts. To connect to actual forms:
+---
 
-**Option 1: Email Links**
+## Connecting the Contact Form
+
+The contact form is pre-built with validation. You need to connect it to a form service.
+
+### Option 1: Formspree (Recommended — Free Tier)
+
+1. Sign up at [formspree.io](https://formspree.io)
+2. Create a new form and copy the form ID
+3. In `index.html`, replace:
+
 ```html
-<a href="mailto:hello@ngozai.com?subject=Free Assessment Request" class="btn btn-primary">
-    Start Your Assessment
+<form id="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" ...>
+```
+
+Replace `YOUR_FORM_ID` with your actual Formspree form ID.
+
+### Option 2: Netlify Forms (If deploying on Netlify)
+
+1. Add `netlify` attribute to the form tag:
+
+```html
+<form id="contact-form" name="contact" netlify ...>
+```
+
+2. Remove the `action` attribute
+3. Form submissions appear in Netlify dashboard
+
+### Option 3: Email Link (Simplest)
+
+Replace the form with a direct email link:
+
+```html
+<a href="mailto:hello@ngozai.com?subject=Free%20Assessment%20Request"
+   class="btn btn-primary">
+    Email Us Directly
 </a>
 ```
 
-**Option 2: Contact Form**
-Add a form service like:
-- Formspree
-- Netlify Forms
-- Google Forms
+### Option 4: Calendly / Scheduling Tool
 
-**Option 3: Scheduling Tool**
 ```html
-<a href="https://calendly.com/your-link" class="btn btn-primary" target="_blank">
+<a href="https://calendly.com/your-link"
+   class="btn btn-primary"
+   target="_blank"
+   rel="noopener noreferrer">
     Schedule Free Assessment
 </a>
 ```
 
-## 🌐 Deployment
+---
 
-### Option 1: Netlify (Recommended - Free)
+## Deployment
+
+### Netlify (Recommended)
 
 1. Push your code to GitHub
-2. Go to [netlify.com](https://netlify.com)
-3. Click "New site from Git"
-4. Connect your GitHub repository
-5. Deploy!
+2. Go to [netlify.com](https://netlify.com) → **New site from Git**
+3. Connect your GitHub repository
+4. Build settings (auto-detected):
+   - **Publish directory:** `.` (root)
+   - No build command needed
+5. Click **Deploy site**
 
-Your site will be live at: `https://your-site-name.netlify.app`
+The `netlify.toml` and `_redirects` files handle configuration automatically.
 
-### Option 2: Vercel (Free)
+**Custom domain:** In Netlify dashboard → Domain settings → Add custom domain → Point your DNS
+
+### Vercel
 
 1. Push code to GitHub
-2. Go to [vercel.com](https://vercel.com)
-3. Import your repository
-4. Deploy automatically
+2. Go to [vercel.com](https://vercel.com) → **Import Project**
+3. Select your repository
+4. Framework preset: **Other**
+5. Deploy
 
-### Option 3: GitHub Pages (Free)
+The `vercel.json` file handles configuration automatically.
 
-1. Push code to GitHub repository
-2. Go to repository Settings → Pages
-3. Select main branch as source
-4. Your site will be at: `https://username.github.io/repo-name`
+### GitHub Pages
 
-## 🔧 Advanced Customization
+1. Push code to a GitHub repository
+2. Go to **Settings** → **Pages**
+3. Source: **Deploy from a branch**
+4. Branch: `main` (or `master`), folder: `/ (root)`
+5. Your site will be live at `https://username.github.io/repo-name`
 
-### Adding Analytics
+**Note:** All paths in the website are relative, so GitHub Pages works without changes.
 
-Add Google Analytics before `</head>`:
+---
+
+## SEO Optimization
+
+The website includes comprehensive SEO meta tags. To customize:
+
+1. **Update canonical URL:** Replace `https://ngozai.com/` with your actual domain
+2. **Update OG image:** Replace the `og:image` URL once you add a real OG image
+3. **Google Analytics:** Add before `</head>`:
 
 ```html
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'GA_MEASUREMENT_ID');
+  gtag('config', 'G-XXXXXXXXXX');
 </script>
 ```
 
-### Adding a Contact Form
-
-Add this in the CTA section (replace the buttons):
+4. **Google Search Console:** Add verification meta tag in `<head>`:
 
 ```html
-<form class="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-    <input type="text" name="name" placeholder="Your Name" required>
-    <input type="email" name="email" placeholder="Your Email" required>
-    <input type="text" name="company" placeholder="Company Name">
-    <textarea name="message" placeholder="Tell us about your Copilot challenge" required></textarea>
-    <button type="submit" class="btn btn-primary">Send Message</button>
-</form>
+<meta name="google-site-verification" content="YOUR_VERIFICATION_CODE">
 ```
 
-### SEO Optimization
-
-Add to `<head>` section:
-
-```html
-<!-- SEO Meta Tags -->
-<meta name="description" content="Transform messy SharePoint into AI-ready data. Make Microsoft Copilot actually work with Ngozai's automated data organization.">
-<meta name="keywords" content="Microsoft Copilot, SharePoint, AI consulting, Data organization, Power Platform">
-<meta name="author" content="Ngozai">
-
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Ngozai - Make Microsoft Copilot Actually Work">
-<meta property="og:description" content="AI-ready SharePoint transformation for real Copilot ROI">
-<meta property="og:image" content="https://your-domain.com/images/og-image.jpg">
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Ngozai - AI-Ready SharePoint Solutions">
-<meta name="twitter:description" content="Transform messy SharePoint into AI-ready data">
-```
-
-## 📱 Mobile Responsiveness
-
-The website is fully responsive and tested on:
-- Desktop (1920px+)
-- Laptop (1024px - 1919px)
-- Tablet (768px - 1023px)
-- Mobile (320px - 767px)
-
-## 🎯 Key Features
-
-- ✅ Modern, Microsoft Edge-inspired design
-- ✅ Smooth scroll animations
-- ✅ Responsive navigation
-- ✅ Interactive cards with hover effects
-- ✅ Gradient backgrounds and floating orbs
-- ✅ Timeline animation for process section
-- ✅ Mobile-friendly hamburger menu
-- ✅ Optimized performance
-- ✅ Clean, semantic HTML
-- ✅ Accessible design
-
-## 🐛 Troubleshooting
-
-**Styles not loading?**
-- Ensure `styles.css` is in the same folder as `index.html`
-- Check browser console for errors (F12)
-
-**Animations not working?**
-- Ensure `script.js` is in the same folder
-- Check if JavaScript is enabled in browser
-
-**Mobile menu not working?**
-- Clear browser cache
-- Check console for JavaScript errors
-
-## 📞 Support
-
-For questions or customization help:
-- Email: hello@ngozai.com
-- Review the code comments for guidance
-- Each section is clearly marked in the HTML
-
-## 🔄 Future Enhancements
-
-Consider adding:
-- [ ] Blog section
-- [ ] Case studies page
-- [ ] Client testimonials
-- [ ] Video demos
-- [ ] Resource downloads
-- [ ] Newsletter signup
-- [ ] Live chat integration
-- [ ] Multi-language support
-
-## 📝 License
-
-This website is created for Ngozai. All rights reserved.
+5. **Create a sitemap.xml** for larger sites
 
 ---
 
-Built with ❤️ - Ngozai
+## Features
+
+### Included
+
+- Semantic HTML5 with WCAG 2.1 AA accessibility
+- Skip-to-content link for keyboard navigation
+- ARIA labels and roles throughout
+- Reduced motion media query support
+- Mobile-first responsive design (480px, 768px, 968px breakpoints)
+- Hamburger menu with keyboard support (Escape to close)
+- Smooth scroll navigation with active link highlighting
+- Scroll-triggered fade-in animations (Intersection Observer)
+- Timeline reveal animation for process section
+- Animated stats counter
+- Subtle parallax on hero background
+- Full contact form with client-side validation
+- Formspree-ready form submission
+- Loading/success/error states on form
+- Back-to-top floating button
+- Cookie consent banner (GDPR compliant, localStorage)
+- Page loading animation
+- Social proof / testimonials section
+- Microsoft-inspired design system
+- Performance optimized (will-change, passive listeners, requestAnimationFrame)
+- Security headers in deployment configs
+- SEO meta tags (Open Graph, Twitter Card, canonical)
+
+### Browser Support
+
+- Chrome 80+
+- Firefox 80+
+- Safari 14+
+- Edge 80+
+- Mobile Safari / Chrome (iOS/Android)
+
+---
+
+## Troubleshooting
+
+**Styles not loading?**
+- Ensure `styles.css` is in the same folder as `index.html`
+- Check browser console (F12) for 404 errors
+- Verify relative paths are correct
+
+**Animations not working?**
+- Check if JavaScript is enabled in your browser
+- Look for console errors (F12 → Console tab)
+- If you prefer no animations, the site respects `prefers-reduced-motion` OS setting
+
+**Mobile menu not working?**
+- Clear browser cache (Ctrl+Shift+R / Cmd+Shift+R)
+- Verify `script.js` is loaded (check Network tab in DevTools)
+
+**Form not submitting?**
+- Replace `YOUR_FORM_ID` in the form action with your real Formspree ID
+- In demo mode (with placeholder ID), it simulates a successful submission
+- Check browser console for network errors
+
+**Cookie banner keeps showing?**
+- Clear localStorage: `localStorage.removeItem('ngozai-cookie-consent')`
+
+---
+
+## Future Enhancements
+
+- [ ] Blog / articles section
+- [ ] Case studies with detailed results
+- [ ] Video demo embed
+- [ ] Real client testimonials with photos
+- [ ] Newsletter signup integration
+- [ ] Live chat widget (Intercom, Drift, etc.)
+- [ ] Multi-language support
+- [ ] Dark mode toggle
+- [ ] Resource downloads (whitepapers, guides)
+- [ ] Calendly integration for scheduling
+- [ ] Analytics dashboard integration
+
+---
+
+## License
+
+This website is created for Ngozai. All rights reserved.
+
+**Contact:** hello@ngozai.com
