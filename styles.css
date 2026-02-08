@@ -3,6 +3,16 @@
    Brand colors: #000000, #0cc0df, #ffde59, #ffffff
    ============================================= */
 
+/* TAN Angleton — brand font for "Ngozai" wordmark */
+@font-face {
+    font-family: 'TAN Angleton';
+    src: url('https://db.onlinewebfonts.com/t/32aac839ec8704951d812018c43e298d.woff2') format('woff2'),
+         url('https://db.onlinewebfonts.com/t/32aac839ec8704951d812018c43e298d.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
 /* Reset and Base Styles */
 *,
 *::before,
@@ -211,7 +221,7 @@ body {
 .nav-brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
     font-size: 20px;
     font-weight: 600;
     color: var(--text-primary);
@@ -221,6 +231,13 @@ body {
 
 .nav-brand:hover {
     opacity: 0.8;
+}
+
+/* TAN Angleton for all "Ngozai" brand text */
+.brand-name {
+    font-family: 'TAN Angleton', Georgia, 'Times New Roman', serif;
+    font-weight: 400;
+    letter-spacing: 0.02em;
 }
 
 .logo-icon {
@@ -378,8 +395,8 @@ body {
 }
 
 .hero-logo {
-    width: 80px;
-    height: 80px;
+    width: 140px;
+    height: 140px;
     object-fit: contain;
     margin-bottom: 40px;
 }
@@ -1679,7 +1696,7 @@ section {
 .footer-logo {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
     font-size: 20px;
     font-weight: 600;
 }
@@ -1952,8 +1969,8 @@ section {
     }
     
     .hero-logo {
-        width: 64px;
-        height: 64px;
+        width: 100px;
+        height: 100px;
         margin-bottom: 28px;
     }
     
@@ -2028,8 +2045,8 @@ section {
     }
     
     .hero-logo {
-        width: 56px;
-        height: 56px;
+        width: 80px;
+        height: 80px;
         margin-bottom: 24px;
     }
     
