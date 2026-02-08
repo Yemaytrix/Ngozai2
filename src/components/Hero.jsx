@@ -17,10 +17,10 @@ export default function Hero() {
           className="w-36 h-36 object-contain mx-auto mb-10"
         />
         <h1 className="text-5xl md:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6">
-          Make Microsoft Copilot Actually Work
+          Powered by AI. Built by Creators. Inspired by You.
         </h1>
         <p className="text-lg md:text-xl text-white/80 leading-relaxed mb-10 max-w-xl mx-auto">
-          Transform messy SharePoint into AI-ready data. Get 80% improvement in Copilot accuracy with automated, Microsoft-native data organization.
+          Reducing daily friction, restoring trust in your data, and giving you time back to focus on what matters most.
         </p>
         <a
           href="#contact"
