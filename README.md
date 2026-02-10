@@ -608,4 +608,4 @@ Your website is **production-ready**! Here's your deployment sequence:
 
 **Need help?** Contact: hello@ngozai.com
 
-Built with precision and care for Ngozai | Make Microsoft Copilot Actually Work
+Built with precision and care for Ngozai | Powered by AI. Built by Creators. Inspired by You.
