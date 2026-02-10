@@ -16,7 +16,7 @@ export default function Footer() {
               <span className="font-brand text-xl text-white tracking-wide">Ngozai</span>
             </div>
             <p className="text-sm text-white/70 leading-relaxed">
-              Making Microsoft Copilot actually work through AI-ready SharePoint transformation.
+              Powered by AI. Built by Creators. Inspired by You.
             </p>
           </div>
 
