@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 
 const links = [
-  { href: '#home', label: 'Home' },
-  { href: '#solutions', label: 'Solutions' },
-  { href: '#about', label: 'About' },
-  { href: '#contact', label: 'Contact' },
+  { to: '/', label: 'Home' },
+  { to: '/solutions/ai-readiness-assessment', label: 'Solutions' },
+  { to: '/about', label: 'About' },
+  { to: '/contact', label: 'Contact' },
 ]
 
 export default function Navbar({ scrolled }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
+  const isHome = location.pathname === '/'
 
   // Close on Escape
   useEffect(() => {
@@ -17,65 +20,73 @@ export default function Navbar({ scrolled }) {
     return () => document.removeEventListener('keydown', onKey)
   }, [])
 
+  // Close menu on route change
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [location.pathname])
+
+  // On non-home pages the navbar is always "scrolled" style (white bg)
+  const isScrolled = !isHome || scrolled
+
   return (
     <nav
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-        scrolled
+        isScrolled
           ? 'bg-white/95 backdrop-blur-xl border-b border-black/5 shadow-sm py-2.5'
           : 'bg-transparent py-4'
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Brand */}
-        <a href="#home" className="flex items-center gap-1.5 no-underline group">
+        <Link to="/" className="flex items-center gap-1.5 no-underline group">
           <img
             src="/assets/images/Ngozai symbol white.png"
             alt=""
-            className={`w-8 h-8 object-contain transition-opacity duration-300 ${scrolled ? 'hidden' : 'block'}`}
+            className={`w-8 h-8 object-contain transition-opacity duration-300 ${isScrolled ? 'hidden' : 'block'}`}
           />
           <img
             src="/assets/images/Ngozai symbol black.png"
             alt=""
-            className={`w-8 h-8 object-contain transition-opacity duration-300 ${scrolled ? 'block' : 'hidden'}`}
+            className={`w-8 h-8 object-contain transition-opacity duration-300 ${isScrolled ? 'block' : 'hidden'}`}
           />
           <span
             className={`font-brand text-xl tracking-wide transition-colors duration-300 ${
-              scrolled ? 'text-black' : 'text-white'
+              isScrolled ? 'text-black' : 'text-white'
             }`}
           >
             Ngozai
           </span>
-        </a>
+        </Link>
 
         {/* Desktop links */}
         <ul className="hidden md:flex items-center gap-1">
           {links.map((l) => (
-            <li key={l.href}>
-              <a
-                href={l.href}
+            <li key={l.to}>
+              <Link
+                to={l.to}
                 className={`px-4 py-2 rounded text-sm font-medium transition-colors duration-200 ${
-                  scrolled
+                  isScrolled
                     ? 'text-black hover:text-brand hover:bg-brand/5'
                     : 'text-white/90 hover:text-white'
                 }`}
               >
                 {l.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
 
         {/* CTA */}
-        <a
-          href="#contact"
+        <Link
+          to="/contact"
           className={`hidden md:inline-flex items-center px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${
-            scrolled
+            isScrolled
               ? 'bg-brand text-black hover:bg-brand-dark'
               : 'bg-white text-black hover:shadow-lg hover:-translate-y-0.5'
           }`}
         >
           Get Started
-        </a>
+        </Link>
 
         {/* Hamburger */}
         <button
@@ -88,7 +99,7 @@ export default function Navbar({ scrolled }) {
             <span
               key={i}
               className={`block w-5 h-0.5 transition-all duration-200 ${
-                scrolled ? 'bg-black' : 'bg-white'
+                isScrolled ? 'bg-black' : 'bg-white'
               } ${
                 menuOpen && i === 0
                   ? 'rotate-45 translate-y-2'
@@ -107,14 +118,13 @@ export default function Navbar({ scrolled }) {
       {menuOpen && (
         <div className="md:hidden bg-white shadow-lg">
           {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              onClick={() => setMenuOpen(false)}
+            <Link
+              key={l.to}
+              to={l.to}
               className="block px-8 py-3.5 text-black font-medium border-b border-gray-100 hover:bg-gray-50"
             >
               {l.label}
-            </a>
+            </Link>
           ))}
         </div>
       )}

@@ -43,3 +43,15 @@ body {
 .skip-to-content:focus {
   @apply top-0;
 }
+
+/* Assessment page fade animation */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
