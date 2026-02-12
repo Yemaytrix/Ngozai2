@@ -4,15 +4,15 @@ export default function Hero() {
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-[#0a0a0a] to-black" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_80%,rgba(12,192,223,0.2)_0%,transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_20%,rgba(255,222,89,0.1)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_80%,rgba(51,102,255,0.2)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_20%,rgba(176,51,227,0.15)_0%,transparent_50%)]" />
       </div>
       <div className="absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center_40%,rgba(0,0,0,0.15)_0%,rgba(0,0,0,0.5)_100%)]" />
 
       {/* Content */}
       <div className="relative z-[2] text-center max-w-3xl px-6 py-32">
         <img
-          src="/assets/images/Ngozai symbol white.png"
+          src="/assets/images/Ngozai_Rainbow.png"
           alt="Ngozai"
           className="w-36 h-36 object-contain mx-auto mb-10"
         />

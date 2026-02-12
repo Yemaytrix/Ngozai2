@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+const BOOKING_URL = 'https://outlook.office.com/bookwithme/user/55fd4b563e6c4860a246d85de6ad291b@ngozai.com/meetingtype/HqXYTLiDI0yyLVeRiv3IIw2?bookingcode=c77aa87c-0800-459c-9c4c-2a864843ca34&anonymous&ep=mlink';
+
 /* ════════════════════════════════════════════════════════════════════════
    PILLAR DATA — 6 pillars × 3 questions, each scored 0-3 (max raw = 9)
    ════════════════════════════════════════════════════════════════════════ */
@@ -423,50 +425,26 @@ const FINDINGS = {
 /* ════════════════════════════════════════════════════════════════════════
    SCOPE ESTIMATION
    ════════════════════════════════════════════════════════════════════════ */
-const SIZE_MULTIPLIERS = {
-  '1-100': 0.6,
-  '101-500': 0.8,
-  '501-1500': 1.0,
-  '1501-5000': 1.3,
-  '5001+': 1.6,
-};
-
-function estimateScope(pillarScores, employeeCount) {
+function estimateScope(pillarScores) {
   const atRisk = pillarScores.filter((p) => p.pct < 40).length;
   const needsWork = pillarScores.filter((p) => p.pct < 75).length;
-  const mult = SIZE_MULTIPLIERS[employeeCount] || 1.0;
 
-  let tier, baseLow, baseHigh, weeksLow, weeksHigh;
+  let priority, weeksLow, weeksHigh;
   if (atRisk >= 3) {
-    tier = 'Large';
-    baseLow = 40000;
-    baseHigh = 75000;
+    priority = 'High';
     weeksLow = 4;
     weeksHigh = 8;
   } else if (atRisk >= 1 || needsWork >= 4) {
-    tier = 'Medium';
-    baseLow = 15000;
-    baseHigh = 40000;
+    priority = 'Medium';
     weeksLow = 2;
     weeksHigh = 4;
   } else {
-    tier = 'Small';
-    baseLow = 5000;
-    baseHigh = 15000;
+    priority = 'Low';
     weeksLow = 1;
     weeksHigh = 2;
   }
 
-  const costLow = Math.round((baseLow * mult) / 1000) * 1000;
-  const costHigh = Math.round((baseHigh * mult) / 1000) * 1000;
-  const wLow = Math.max(1, Math.round(weeksLow * mult));
-  const wHigh = Math.max(1, Math.round(weeksHigh * mult));
-
-  return {
-    tier,
-    cost: `$${(costLow / 1000).toFixed(0)}K – $${(costHigh / 1000).toFixed(0)}K`,
-    timeline: wLow === wHigh ? `${wLow} weeks` : `${wLow}–${wHigh} weeks`,
-  };
+  return { priority, weeksLow, weeksHigh, urgency: priority, atRisk, needsWork };
 }
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -522,7 +500,7 @@ function RadarChart({ pillarScores }) {
           key={i}
           points={hexPoints(R * l)}
           fill="none"
-          stroke="#e5e7eb"
+          stroke="rgba(255,255,255,0.06)"
           strokeWidth="1"
         />
       ))}
@@ -536,7 +514,7 @@ function RadarChart({ pillarScores }) {
             y1={cy}
             x2={x}
             y2={y}
-            stroke="#e5e7eb"
+            stroke="rgba(255,255,255,0.06)"
             strokeWidth="1"
           />
         );
@@ -548,7 +526,7 @@ function RadarChart({ pillarScores }) {
           x={cx + 4}
           y={cy - R * l + 1}
           fontSize="8"
-          fill="#aaa"
+          fill="#555"
           dominantBaseline="middle"
         >
           {Math.round(l * 100)}%
@@ -575,7 +553,7 @@ function RadarChart({ pillarScores }) {
             y={y + labelDy(i)}
             textAnchor={anchor(i)}
             fontSize="10"
-            fill="#555"
+            fill="#888"
             fontWeight="600"
           >
             {label}
@@ -589,7 +567,7 @@ function RadarChart({ pillarScores }) {
 /* ════════════════════════════════════════════════════════════════════════
    COMPUTE RESULTS
    ════════════════════════════════════════════════════════════════════════ */
-function computeResults(answers, employeeCount) {
+function computeResults(answers) {
   const pillarScores = PILLARS.map((pillar) => {
     const raw = pillar.questions.reduce(
       (sum, q) => sum + (answers[q.id] ?? 0),
@@ -622,7 +600,7 @@ function computeResults(answers, employeeCount) {
     pillarScores.reduce((sum, p) => sum + p.pct * p.weight, 0),
   );
 
-  const scope = estimateScope(pillarScores, employeeCount);
+  const scope = estimateScope(pillarScores);
   const blockers = pillarScores.filter((p) => p.pct < 25);
 
   return { overall, pillarScores, scope, blockers };
@@ -640,6 +618,8 @@ export default function AssessmentPage() {
     company: '',
     jobTitle: '',
     employeeCount: '',
+    companyWebsite: '',
+    industry: '',
   });
   const [answers, setAnswers] = useState({});
   const [error, setError] = useState('');
@@ -657,7 +637,8 @@ export default function AssessmentPage() {
       !form.email ||
       !form.company ||
       !form.jobTitle ||
-      !form.employeeCount
+      !form.employeeCount ||
+      !form.industry
     ) {
       showError('Please fill in all required fields.');
       return false;
@@ -685,7 +666,7 @@ export default function AssessmentPage() {
       }
       if (step === 7) {
         setStep(8);
-        const results = computeResults(answers, form.employeeCount);
+        const results = computeResults(answers);
         setTimeout(() => {
           setResult(results);
           setStep(9);
@@ -702,12 +683,18 @@ export default function AssessmentPage() {
 
   /* ── render ──────────────────────────────────────────────────────── */
   return (
-    <section className="min-h-screen bg-gradient-to-br from-brand via-brand-dark to-[#086a7a] py-12 px-5 pt-32">
-      <div className="max-w-[820px] mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
+    <section className="min-h-screen bg-[#0a0a0a] py-12 px-5 pt-32">
+      <div className="max-w-[820px] mx-auto bg-[#111]/80 backdrop-blur-xl border border-white/[0.06] rounded-xl shadow-2xl overflow-hidden">
         {/* ── Header ── */}
-        <div className="bg-gradient-to-r from-brand to-accent text-black px-10 py-10 text-center">
-          <h1 className="text-3xl font-bold mb-2">Copilot Readiness Assessment</h1>
-          <p className="text-lg opacity-90">
+        <div className="border-b border-white/[0.06] bg-transparent px-10 py-10 text-center">
+          <img src="/assets/images/Ngozai_Rainbow.png" alt="Ngozai" className="w-14 h-14 mx-auto mb-4 object-contain" />
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-[#B033E3] via-[#3366FF] to-[#33FF99] bg-clip-text text-transparent">
+            Copilot Readiness Assessment
+          </h1>
+          <p className="text-lg text-gray-400">
+            Complimentary Enterprise Diagnostic
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
             6-Pillar SharePoint &amp; Microsoft 365 Readiness Score
           </p>
         </div>
@@ -715,16 +702,16 @@ export default function AssessmentPage() {
         <div className="p-8 md:p-10">
           {/* ── Error banner ── */}
           {error && (
-            <div className="bg-red-50 text-red-700 border border-red-200 px-4 py-3 rounded mb-6 text-sm">
+            <div className="bg-red-500/10 text-red-400 border border-red-500/20 px-4 py-3 rounded mb-6 text-sm">
               {error}
             </div>
           )}
 
           {/* ── Progress bar ── */}
           {step < 9 && (
-            <div className="h-1.5 bg-gray-200 rounded-full mb-8 overflow-hidden">
+            <div className="h-1.5 bg-white/[0.06] rounded-full mb-8 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-brand to-accent rounded-full transition-all duration-500"
+                className="h-full bg-gradient-to-r from-[#B033E3] via-[#3366FF] to-[#33FF99] rounded-full transition-all duration-500"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -733,8 +720,8 @@ export default function AssessmentPage() {
           {/* ═══════════════════ STEP 1 — CONTACT ═══════════════════ */}
           {step === 1 && (
             <div className="animate-[fadeUp_0.5s_ease]">
-              <h2 className="text-2xl font-bold mb-2">Let&apos;s Get Started</h2>
-              <p className="text-muted mb-6">
+              <h2 className="text-2xl font-bold mb-2 text-white">Let&apos;s Get Started</h2>
+              <p className="text-gray-500 mb-6">
                 Tell us about yourself and your organisation:
               </p>
 
@@ -765,7 +752,7 @@ export default function AssessmentPage() {
                 },
               ].map((f) => (
                 <div key={f.id} className="mb-5">
-                  <label className="block text-sm font-semibold mb-1.5">
+                  <label className="block text-sm font-semibold mb-1.5 text-gray-300">
                     {f.label} <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -775,13 +762,13 @@ export default function AssessmentPage() {
                     onChange={(e) =>
                       setForm({ ...form, [f.id]: e.target.value })
                     }
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded text-sm focus:outline-none focus:border-brand transition-colors"
+                    className="w-full px-4 py-3 border border-white/[0.06] bg-white/[0.02] rounded text-sm text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors"
                   />
                 </div>
               ))}
 
               <div className="mb-5">
-                <label className="block text-sm font-semibold mb-1.5">
+                <label className="block text-sm font-semibold mb-1.5 text-gray-300">
                   Number of Employees <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -789,7 +776,7 @@ export default function AssessmentPage() {
                   onChange={(e) =>
                     setForm({ ...form, employeeCount: e.target.value })
                   }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded text-sm focus:outline-none focus:border-brand transition-colors"
+                  className="w-full px-4 py-3 border border-white/[0.06] bg-white/[0.02] rounded text-sm text-white focus:outline-none focus:border-brand transition-colors"
                 >
                   <option value="">Select range...</option>
                   <option value="1-100">1 – 100</option>
@@ -800,9 +787,52 @@ export default function AssessmentPage() {
                 </select>
               </div>
 
+              <div className="mb-5">
+                <label className="block text-sm font-semibold mb-1.5 text-gray-300">
+                  Industry <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={form.industry}
+                  onChange={(e) =>
+                    setForm({ ...form, industry: e.target.value })
+                  }
+                  className="w-full px-4 py-3 border border-white/[0.06] bg-white/[0.02] rounded text-sm text-white focus:outline-none focus:border-brand transition-colors"
+                >
+                  <option value="">Select industry...</option>
+                  <option value="Financial Services">Financial Services</option>
+                  <option value="Healthcare">Healthcare</option>
+                  <option value="Legal">Legal</option>
+                  <option value="Energy">Energy</option>
+                  <option value="Manufacturing">Manufacturing</option>
+                  <option value="Professional Services">Professional Services</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Government">Government</option>
+                  <option value="Education">Education</option>
+                  <option value="Real Estate">Real Estate</option>
+                  <option value="Retail">Retail</option>
+                  <option value="Nonprofit">Nonprofit</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div className="mb-5">
+                <label className="block text-sm font-semibold mb-1.5 text-gray-300">
+                  Company Website
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://www.example.com"
+                  value={form.companyWebsite}
+                  onChange={(e) =>
+                    setForm({ ...form, companyWebsite: e.target.value })
+                  }
+                  className="w-full px-4 py-3 border border-white/[0.06] bg-white/[0.02] rounded text-sm text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors"
+                />
+              </div>
+
               <button
                 onClick={next}
-                className="w-full bg-gradient-to-r from-brand to-accent text-black font-semibold py-3.5 rounded hover:opacity-90 transition-opacity cursor-pointer"
+                className="w-full bg-gradient-to-r from-[#B033E3] via-[#3366FF] to-[#33FF99] text-white font-semibold py-3.5 rounded hover:opacity-90 transition-opacity cursor-pointer"
               >
                 Start Assessment
               </button>
@@ -819,23 +849,23 @@ export default function AssessmentPage() {
                   <p className="text-xs font-semibold text-brand mb-1 uppercase tracking-wide">
                     Pillar {step - 1} of 6
                   </p>
-                  <h2 className="text-2xl font-bold mb-1">{pillar.label}</h2>
-                  <p className="text-muted mb-6 text-sm">{pillar.description}</p>
+                  <h2 className="text-2xl font-bold mb-1 text-white">{pillar.label}</h2>
+                  <p className="text-gray-500 mb-6 text-sm">{pillar.description}</p>
 
                   {pillar.questions.map((q) => (
-                    <div key={q.id} className="mb-8 bg-surface p-6 rounded-lg">
-                      <h3 className="text-base font-semibold text-brand mb-4 leading-snug">
+                    <div key={q.id} className="mb-8 bg-white/[0.02] border border-white/[0.06] p-6 rounded-lg">
+                      <h3 className="text-base font-semibold text-gray-300 mb-4 leading-snug">
                         {q.text}
                       </h3>
                       <div className="space-y-3">
                         {q.options.map((opt, i) => (
                           <label
                             key={i}
-                            className={`flex items-start gap-3 p-3 bg-white border-2 rounded cursor-pointer transition-all ${
+                            className={`flex items-start gap-3 p-3 bg-white/[0.01] border rounded cursor-pointer transition-all ${
                               answers[q.id] === opt.score &&
                               answers[`${q.id}_idx`] === i
-                                ? 'border-brand bg-brand/5'
-                                : 'border-gray-200 hover:border-brand/40'
+                                ? 'border-brand bg-brand/10'
+                                : 'border-white/[0.06] hover:border-brand/40'
                             }`}
                           >
                             <input
@@ -854,7 +884,7 @@ export default function AssessmentPage() {
                                 })
                               }
                             />
-                            <span className="text-sm leading-snug">
+                            <span className="text-sm leading-snug text-gray-300">
                               {opt.label}
                             </span>
                           </label>
@@ -866,13 +896,13 @@ export default function AssessmentPage() {
                   <div className="flex gap-4">
                     <button
                       onClick={prev}
-                      className="px-6 py-3 bg-gray-100 rounded font-semibold text-sm hover:bg-gray-200 transition-colors cursor-pointer"
+                      className="px-6 py-3 bg-white/[0.04] border border-white/[0.06] rounded font-semibold text-sm text-gray-300 hover:bg-white/[0.08] transition-colors cursor-pointer"
                     >
                       Back
                     </button>
                     <button
                       onClick={next}
-                      className="flex-1 bg-gradient-to-r from-brand to-accent text-black font-semibold py-3 rounded hover:opacity-90 transition-opacity cursor-pointer"
+                      className="flex-1 bg-gradient-to-r from-[#B033E3] via-[#3366FF] to-[#33FF99] text-white font-semibold py-3 rounded hover:opacity-90 transition-opacity cursor-pointer"
                     >
                       {step === 7 ? 'Get My Results' : 'Continue'}
                     </button>
@@ -884,34 +914,38 @@ export default function AssessmentPage() {
           {/* ═══════════════════ STEP 8 — LOADING ═══════════════════ */}
           {step === 8 && (
             <div className="text-center py-16 animate-[fadeUp_0.5s_ease]">
-              <div className="w-12 h-12 border-4 border-gray-200 border-t-brand rounded-full animate-spin mx-auto mb-6" />
-              <h3 className="text-xl font-bold mb-2">
+              <div className="w-12 h-12 border-4 border-white/[0.06] border-t-brand rounded-full animate-spin mx-auto mb-6" />
+              <h3 className="text-xl font-bold mb-2 text-white">
                 Analysing Your Responses…
               </h3>
-              <p className="text-muted">
+              <p className="text-gray-500">
                 Calculating your 6-pillar readiness score.
               </p>
             </div>
           )}
 
           {/* ═══════════════════ STEP 9 — RESULTS ═══════════════════ */}
-          {step === 9 && result && (
+          {step === 9 && result && (() => {
+            const assessmentId = 'NGZ-' + Date.now().toString(36).toUpperCase();
+            return (
             <div className="animate-[fadeUp_0.5s_ease]">
+              {/* ── Assessment ID ── */}
+              <p className="text-xs text-gray-500 font-mono mb-6 text-right">Assessment ID: {assessmentId}</p>
+
               {/* ── Overall Score + Radar ── */}
               <div className="flex flex-col md:flex-row items-center gap-8 mb-10">
                 <div className="flex flex-col items-center shrink-0">
                   <div
-                    className="w-44 h-44 rounded-full flex flex-col items-center justify-center text-white shadow-lg"
-                    style={{ backgroundColor: getStatus(result.overall).color }}
+                    className="w-44 h-44 rounded-full flex flex-col items-center justify-center border border-white/[0.06] bg-white/[0.02]"
                   >
-                    <span className="text-5xl font-bold">
+                    <span className="text-5xl font-bold bg-gradient-to-r from-[#B033E3] via-[#3366FF] to-[#33FF99] bg-clip-text text-transparent">
                       {result.overall}%
                     </span>
-                    <span className="text-sm mt-1 opacity-90">
+                    <span className="text-sm mt-1 text-gray-400">
                       {getStatus(result.overall).label}
                     </span>
                   </div>
-                  <p className="text-muted text-sm mt-3 font-medium">
+                  <p className="text-gray-500 text-sm mt-3 font-medium">
                     Overall Readiness
                   </p>
                 </div>
@@ -923,7 +957,7 @@ export default function AssessmentPage() {
 
               {/* ── Critical Blockers ── */}
               {result.blockers.length > 0 && (
-                <div className="bg-red-50 border-2 border-[#D13438] rounded-lg p-5 mb-8">
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-5 mb-8">
                   <h3 className="text-lg font-bold text-[#D13438] mb-2">
                     ⚠ Critical Blockers ({result.blockers.length})
                   </h3>
@@ -944,17 +978,17 @@ export default function AssessmentPage() {
               )}
 
               {/* ── Pillar-by-Pillar Cards ── */}
-              <h3 className="text-xl font-bold mb-4">
+              <h3 className="text-xl font-bold mb-4 text-white">
                 Pillar-by-Pillar Breakdown
               </h3>
               <div className="space-y-4 mb-10">
                 {result.pillarScores.map((p) => (
-                  <div key={p.id} className="bg-surface rounded-lg p-5">
+                  <div key={p.id} className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-5">
                     {/* Title row */}
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <h4 className="font-bold text-base">{p.label}</h4>
-                        <p className="text-xs text-muted">{p.description}</p>
+                        <h4 className="font-bold text-base text-white">{p.label}</h4>
+                        <p className="text-xs text-gray-500">{p.description}</p>
                       </div>
                       <span
                         className="text-xs font-bold px-3 py-1 rounded-full text-white shrink-0 ml-3"
@@ -965,7 +999,7 @@ export default function AssessmentPage() {
                     </div>
 
                     {/* Progress bar */}
-                    <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden mb-1">
+                    <div className="h-2.5 bg-white/[0.06] rounded-full overflow-hidden mb-1">
                       <div
                         className="h-full rounded-full transition-all duration-700"
                         style={{
@@ -992,7 +1026,7 @@ export default function AssessmentPage() {
                             <p className="text-[#D13438] font-medium">
                               {f.finding}
                             </p>
-                            <p className="text-muted mt-0.5">
+                            <p className="text-gray-500 mt-0.5">
                               → {f.recommendation}
                             </p>
                           </div>
@@ -1004,37 +1038,37 @@ export default function AssessmentPage() {
               </div>
 
               {/* ── Scope Estimate ── */}
-              <div className="bg-surface rounded-lg p-6 mb-8">
-                <h3 className="text-xl font-bold mb-4">
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-6 mb-8">
+                <h3 className="text-xl font-bold mb-4 text-white">
                   Estimated Remediation Scope
                 </h3>
                 <div className="grid sm:grid-cols-3 gap-4">
                   {[
                     {
-                      label: 'Project Tier',
-                      value: result.scope.tier,
-                      icon: '📋',
+                      label: 'Priority Level',
+                      value: result.scope.priority,
+                      icon: '🎯',
                     },
                     {
                       label: 'Timeline',
-                      value: result.scope.timeline,
+                      value: result.scope.weeksLow === result.scope.weeksHigh ? `${result.scope.weeksLow} weeks` : `${result.scope.weeksLow}–${result.scope.weeksHigh} weeks`,
                       icon: '⏱',
                     },
                     {
-                      label: 'Investment',
-                      value: result.scope.cost,
-                      icon: '💰',
+                      label: 'Areas to Address',
+                      value: `${result.scope.needsWork} of 6 pillars`,
+                      icon: '🔧',
                     },
                   ].map((s) => (
                     <div
                       key={s.label}
-                      className="bg-white p-4 rounded-lg text-center"
+                      className="bg-white/[0.03] border border-white/[0.06] p-4 rounded-lg text-center"
                     >
                       <p className="text-2xl mb-1">{s.icon}</p>
-                      <p className="text-xs text-muted font-semibold mb-1">
+                      <p className="text-xs text-gray-500 font-semibold mb-1">
                         {s.label}
                       </p>
-                      <p className="text-base font-bold text-brand">
+                      <p className="text-base font-bold bg-gradient-to-r from-[#B033E3] via-[#3366FF] to-[#33FF99] bg-clip-text text-transparent">
                         {s.value}
                       </p>
                     </div>
@@ -1043,27 +1077,28 @@ export default function AssessmentPage() {
               </div>
 
               {/* ── CTA ── */}
-              <div className="bg-gradient-to-r from-brand to-accent rounded-lg p-8 text-center text-black">
-                <h3 className="text-xl font-bold mb-3">
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-8 text-center">
+                <h3 className="text-xl font-bold mb-3 bg-gradient-to-r from-[#B033E3] via-[#3366FF] to-[#33FF99] bg-clip-text text-transparent">
                   Ready to Make Copilot Work?
                 </h3>
-                <p className="text-sm mb-5 opacity-90">
-                  Get a customised remediation roadmap from our SharePoint &amp;
-                  Copilot specialists.
+                <p className="text-sm mb-5 text-gray-400 leading-relaxed max-w-xl mx-auto">
+                  Your results reveal specific gaps that, if left unaddressed, could cost your
+                  organisation significantly in wasted Copilot licenses and lost productivity.
+                  In a complimentary 20-minute discovery call, we will walk through your pillar
+                  scores, prioritise the highest-impact fixes, and outline a clear path to
+                  Copilot success.
                 </p>
                 <a
-                  href={`mailto:hello@ngozai.com?subject=${encodeURIComponent(
-                    `Copilot Readiness Assessment — ${form.company}`,
-                  )}&body=${encodeURIComponent(
-                    `Hi Ngozai,\n\nI completed the Copilot Readiness Assessment.\n\nName: ${form.fullName}\nCompany: ${form.company}\nOverall Score: ${result.overall}%\n\nI'd like to schedule a free consultation to discuss our results.\n\nThank you.`,
-                  )}`}
-                  className="inline-flex items-center px-8 py-3 bg-black text-white rounded-full font-semibold hover:bg-gray-900 transition-colors"
+                  href={BOOKING_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-[#B033E3] via-[#3366FF] to-[#33FF99] text-white rounded-full font-semibold hover:opacity-90 transition-opacity"
                 >
-                  Schedule Free Consultation
+                  Schedule a Discovery Call
                 </a>
               </div>
 
-              <p className="text-sm text-muted mt-6 text-center">
+              <p className="text-sm text-gray-500 mt-6 text-center">
                 Questions?{' '}
                 <a
                   href="mailto:hello@ngozai.com"
@@ -1072,8 +1107,15 @@ export default function AssessmentPage() {
                   hello@ngozai.com
                 </a>
               </p>
+
+              {/* ── Methodology footnote ── */}
+              <p className="text-xs text-gray-600 mt-8 text-center leading-relaxed">
+                Methodology: Microsoft Copilot Control System framework, SharePoint Advanced
+                Management criteria, and methodologies from leading Microsoft consulting partners.
+              </p>
             </div>
-          )}
+            );
+          })()}
         </div>
       </div>
     </section>

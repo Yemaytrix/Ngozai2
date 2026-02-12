@@ -40,7 +40,7 @@ export default function Navbar({ scrolled }) {
         {/* Brand */}
         <Link to="/" className="flex items-center gap-1.5 no-underline group">
           <img
-            src="/assets/images/Ngozai symbol white.png"
+            src="/assets/images/Ngozai_Rainbow.png"
             alt=""
             className={`w-8 h-8 object-contain transition-opacity duration-300 ${isScrolled ? 'hidden' : 'block'}`}
           />

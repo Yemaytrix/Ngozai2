@@ -13,10 +13,10 @@
 }
 
 @theme {
-  --color-brand: #0cc0df;
-  --color-brand-dark: #0a9ab3;
-  --color-accent: #ffde59;
-  --color-accent-dark: #e6c84f;
+  --color-brand: #3366FF;
+  --color-brand-dark: #0033CC;
+  --color-accent: #33FF99;
+  --color-accent-dark: #28CC7A;
   --color-dark: #000000;
   --color-success: #107c10;
   --color-danger: #d13438;
@@ -24,6 +24,11 @@
   --color-surface: #fafafa;
 
   --font-brand: "TAN Angleton", Georgia, "Times New Roman", serif;
+}
+
+/* Rainbow gradient utility */
+.gradient-rainbow {
+  background: linear-gradient(135deg, #B033E3, #0033CC, #3366FF, #66CCFF, #33FF99);
 }
 
 /* Smooth scroll */

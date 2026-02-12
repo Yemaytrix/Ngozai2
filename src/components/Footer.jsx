@@ -35,7 +35,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-1.5">
-              <img src="/assets/images/Ngozai symbol white.png" alt="" className="w-8 h-8 object-contain" />
+              <img src="/assets/images/Ngozai_Rainbow.png" alt="" className="w-8 h-8 object-contain" />
               <span className="font-brand text-xl text-white tracking-wide">Ngozai</span>
             </div>
             <p className="text-sm text-white/70 leading-relaxed">
